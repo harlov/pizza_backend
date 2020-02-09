@@ -2,6 +2,7 @@ from typing import List
 
 from pizza_app.core import models
 from pizza_app.core.uow import UnitOfWorkMangerABC, UnitOfWorkABC
+from pizza_app.core.exceptions import EntityNotFound
 
 
 class Service:
@@ -32,8 +33,31 @@ class Service:
     def add_menu_item_to_cart(self, cart_uid: str, menu_item_uid: str, quantity: int = 1):
         with self.uow_manager.new() as uow:
             cart = uow.carts.get(cart_uid)
+            if cart is None:
+                raise EntityNotFound("cart", cart_uid)
+
             menu_item = uow.menu_items.get(menu_item_uid)
+            if menu_item is None:
+                raise EntityNotFound("menu_item", menu_item_uid)
+
             cart.add_item(
+                menu_item=menu_item,
+                quantity=quantity,
+            )
+            uow.commit()
+
+    def delete_menu_item_from_cart(self, cart_uid: str, menu_item_uid: str, quantity: int = 1):
+        with self.uow_manager.new() as uow:
+            cart = uow.carts.get(cart_uid)
+            if cart is None:
+                raise EntityNotFound("cart", cart_uid)
+
+            menu_item = uow.menu_items.get(menu_item_uid)
+
+            if menu_item is None:
+                raise EntityNotFound("menu_item", menu_item_uid)
+
+            cart.delete_item(
                 menu_item=menu_item,
                 quantity=quantity,
             )

@@ -5,6 +5,8 @@ from uuid import uuid4
 from typing import List
 from dataclasses import dataclass
 
+from pizza_app.core import exceptions
+
 
 def make_uid() -> str:
     return str(uuid4())
@@ -76,13 +78,15 @@ class Cart:
         self.items = []
 
     def add_item(self, menu_item: MenuItem, quantity: int):
-        if not hasattr(self, 'items'):
-            self.items = []
+        if quantity <= 0:
+            raise exceptions.CoreException(exceptions.QUANTITY_MUST_BE_POSITIVE, field="quantity")
 
         for item in self.items:
-            if item.menu_item == menu_item:
-                item.quantity += quantity
-                return
+            if item.menu_item != menu_item:
+                continue
+
+            item.quantity += quantity
+            return
 
         self.items.append(CartItem(
             uid=make_uid(),
@@ -90,6 +94,18 @@ class Cart:
             menu_item=menu_item,
             quantity=quantity,
         ))
+
+    def delete_item(self, menu_item: MenuItem, quantity: int):
+        if quantity <= 0:
+            raise exceptions.CoreException(exceptions.QUANTITY_MUST_BE_POSITIVE, field="quantity")
+
+        for item in self.items:
+            if item.menu_item != menu_item:
+                continue
+
+            item.quantity -= quantity
+            if item.quantity <= 0:
+                self.items.remove(item)
 
 
 @dataclass

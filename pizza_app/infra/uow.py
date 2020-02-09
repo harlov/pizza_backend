@@ -23,7 +23,9 @@ class UnitOfWork(UnitOfWorkABC):
         super().__init__(
             carts=repositories.CartRepository(session),
             currencies=repositories.CurrencyRepository(session),
-            menu_items=repositories.MenuItemRepository(session)
+            menu_items=repositories.MenuItemRepository(session),
+            clients=repositories.ClientRepository(session),
+            orders=repositories.OrderRepository(session),
         )
 
     def rollback(self):

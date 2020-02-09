@@ -25,7 +25,9 @@ def bind_routes_to_app(app: Flask):
 
 @route('/api/v1/menu/', methods=['GET'])
 def list_menu():
-    return jsonify(service.get_menu_items())
+    return jsonify(
+        schemas.menu_item_schema.dump(service.get_menu_items(), many=True)
+    )
 
 
 @route('/api/v1/cart/<uid>', methods=['GET'])

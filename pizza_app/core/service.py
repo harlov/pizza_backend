@@ -63,6 +63,31 @@ class Service:
             )
             uow.commit()
 
+    def make_order(self, cart_uid: str, client_name: str, client_phone: str, client_address: str):
+        with self.uow_manager.new() as uow:
+            cart = uow.carts.get(cart_uid)
+            if cart is None:
+                raise EntityNotFound("cart", cart_uid)
+
+            client = uow.clients.get_by_phone(client_phone)
+            if client is None:
+                client = uow.clients.save(models.Client(
+                    uid=models.make_uid(),
+                    name=client_name,
+                    address=client_address,
+                    phone=client_phone,
+                ))
+
+            eur_currency = uow.currencies.get_by_name("EUR")  # TODO: get from user preferences
+
+            order = models.Order.make_from_cart(cart, client,
+                                                address=client_address,
+                                                phone=client_phone,
+                                                currency=eur_currency)
+            uow.orders.save(order)
+            uow.commit()
+            return order
+
     def pre_fill_data(self):
         with self.uow_manager.new() as uow:
             self._pre_fill_currencies(uow)

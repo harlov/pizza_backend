@@ -64,3 +64,30 @@ def test_add_items_to_cart(service: Service, cart: models.Cart,
     assert len(cart_state.items) == 2
     assert cart_state.items[0].menu_item == menu_item
     assert cart_state.items[0].quantity == 3
+
+
+def test_make_order(service: Service, cart: models.Cart, menu_item: models.MenuItem, menu_item_2: models.MenuItem, uow: UnitOfWorkABC) -> models.Order:
+    fake_name = "Pikachu"
+    fake_phone = "+7-900-800-8001"
+    fake_address = "Moscow, Kremlin"
+
+    service.add_menu_item_to_cart(cart.uid, menu_item.uid, 1)
+    service.add_menu_item_to_cart(cart.uid, menu_item_2.uid, 2)
+    order = service.make_order(cart.uid, fake_name, fake_phone, fake_address)
+    order_state = uow.orders.get(order.uid)
+    assert order_state is not None and order_state.uid == order.uid
+
+    assert order_state.price_value == (
+        menu_item.price_value +
+        menu_item_2.price_value * 2 +
+        3.0
+    )
+    assert order_state.client is not None
+
+    client = uow.clients.get_by_phone("+7-900-800-8001")
+    assert client == order_state.client
+    assert order_state.address == fake_address == client.address
+    assert order_state.phone == fake_phone == client.phone
+
+    cart = uow.carts.get(cart.uid)
+    assert cart.status == models.CartStatus.STATUS_PROCESSED

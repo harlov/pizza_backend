@@ -52,3 +52,23 @@ class CartRepositoryABC(abc.ABC):
     @abc.abstractmethod
     def get(self, uid: str) -> models.Cart:
         ...
+
+
+class ClientRepositoryABC(abc.ABC):
+    @abc.abstractmethod
+    def save(self, client: models.Client) -> models.Client:
+        ...
+
+    @abc.abstractmethod
+    def get_by_phone(self, phone: str) -> models.Client:
+        ...
+
+
+class OrderRepositoryABC(abc.ABC):
+    @abc.abstractmethod
+    def save(self, order: models.Order) -> models.Order:
+        ...
+
+    @abc.abstractmethod
+    def get(self, uid: str) -> models.Order:
+        ...

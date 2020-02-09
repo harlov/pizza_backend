@@ -11,3 +11,4 @@ class EntityNotFound(Exception):
 
 
 QUANTITY_MUST_BE_POSITIVE = "Quantity must be positive"
+CART_IS_PROCESSED = "Cart is already processed"

@@ -52,6 +52,25 @@ cart_items = Table(
 )
 
 
+clients = Table(
+    'clients', metadata,
+    _get_pk_column(),
+    Column('name',  String),
+    Column('phone', String),
+    Column('address', String),
+)
+
+orders = Table(
+    'orders', metadata,
+    _get_pk_column(),
+    Column('client_uid', ForeignKey('clients.uid')),
+    Column('cart_uid', ForeignKey('carts.uid')),
+    Column('phone', String),
+    Column('address', String),
+    Column('price_value', Float),
+    Column('price_currency_uid', ForeignKey('currencies.uid'))
+)
+
 _mappers_was_bind = False
 
 
@@ -80,6 +99,18 @@ def bind_mappers():
         'menu_item': relationship(
             menu_items_mapper,
             foreign_keys=(cart_items.c.menu_item_uid,)
+        )
+    })
+
+    clients_mapper = mapper(models.Client, clients)
+    orders_mapper = mapper(models.Order, orders, properties={
+        'client': relationship(
+            clients_mapper,
+            foreign_keys=(orders.c.client_uid,)
+        ),
+        'cart': relationship(
+            carts_mapper,
+            foreign_keys=(orders.c.cart_uid,)
         )
     })
 

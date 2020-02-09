@@ -47,14 +47,6 @@ class MenuItem:
         return self.uid == other.uid
 
 
-@dataclass
-class Client:
-    uid: str
-    name: str
-    address: str
-    phone: str
-
-
 class CartStatus(enum.IntEnum):
     STATUS_ACTIVE = 1
     STATUS_PROCESSED = 2
@@ -77,7 +69,22 @@ class Cart:
     def __post_init__(self):
         self.items = []
 
+    @property
+    def total_sum(self) -> float:
+        total = sum(
+            item.menu_item.price_value * item.quantity for item in self.items
+        )
+        return total
+
+    @property
+    def delivery_cost(self) -> float:
+        # It's constant but should be calculated in another place in future.
+        return 3.0
+
     def add_item(self, menu_item: MenuItem, quantity: int):
+        if self.status == CartStatus.STATUS_PROCESSED:
+            raise exceptions.CoreException(exceptions.CART_IS_PROCESSED)
+
         if quantity <= 0:
             raise exceptions.CoreException(exceptions.QUANTITY_MUST_BE_POSITIVE, field="quantity")
 
@@ -96,6 +103,9 @@ class Cart:
         ))
 
     def delete_item(self, menu_item: MenuItem, quantity: int):
+        if self.status == CartStatus.STATUS_PROCESSED:
+            raise exceptions.CoreException(exceptions.CART_IS_PROCESSED)
+
         if quantity <= 0:
             raise exceptions.CoreException(exceptions.QUANTITY_MUST_BE_POSITIVE, field="quantity")
 
@@ -109,9 +119,35 @@ class Cart:
 
 
 @dataclass
+class Client:
+    uid: str
+    name: str
+    address: str
+    phone: str
+
+
+@dataclass
 class Order:
+    uid: str
     client: Client
     cart: Cart
+    address: str
+    phone: str
     price_value: float
     price_currency: Currency
 
+    @classmethod
+    def make_from_cart(cls, cart: Cart, client: Client, address: str, phone: str, currency: Currency) -> Order:
+        order = Order(
+            uid=make_uid(),
+            cart=cart,
+            client=client,
+            address=address,
+            phone=phone,
+            price_value=cart.total_sum + cart.delivery_cost,  # TODO: convert to currency
+            price_currency=currency
+        )
+
+        cart.status = CartStatus.STATUS_PROCESSED  # Lock cart
+
+        return order

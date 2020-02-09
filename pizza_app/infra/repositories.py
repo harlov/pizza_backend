@@ -1,4 +1,5 @@
 from typing import List
+from typing import Optional
 from uuid import UUID
 
 from pizza_app.core import repositories, models
@@ -59,3 +60,20 @@ class MenuItemRepository(repositories.MenuItemRepositoryABC, BaseAlchemyReposito
     def get_list(self) -> List[models.MenuItem]:
         return list(self._session.query(models.MenuItem).order_by(models.MenuItem.name))
 
+
+class ClientRepository(repositories.ClientRepositoryABC, BaseAlchemyRepository):
+    def save(self, client: models.Client) -> models.Client:
+        self._session.add(client)
+        return client
+
+    def get_by_phone(self, phone: str) -> Optional[models.Client]:
+        return self._session.query(models.Client).filter(models.Client.phone == phone).first()
+
+
+class OrderRepository(repositories.OrderRepositoryABC, BaseAlchemyRepository):
+    def get(self, uid: str) -> models.Order:
+        return self._session.query(models.Order).filter(models.Order.uid == uid).first()
+
+    def save(self, order: models.Order) -> models.Order:
+        self._session.add(order)
+        return order

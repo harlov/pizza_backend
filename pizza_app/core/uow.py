@@ -9,14 +9,20 @@ class UnitOfWorkABC(abc.ABC):
     carts: repositories.CartRepositoryABC
     currencies: repositories.CurrencyRepositoryABC
     menu_items: repositories.MenuItemRepositoryABC
+    clients: repositories.ClientRepositoryABC
+    orders: repositories.OrderRepositoryABC
 
     def __init__(self,
                  carts: repositories.CartRepositoryABC,
                  currencies: repositories.CurrencyRepositoryABC,
-                 menu_items: repositories.MenuItemRepositoryABC):
+                 menu_items: repositories.MenuItemRepositoryABC,
+                 clients: repositories.ClientRepositoryABC,
+                 orders: repositories.OrderRepositoryABC):
         self.carts = carts
         self.currencies = currencies
         self.menu_items = menu_items
+        self.clients = clients
+        self.orders = orders
 
     def __enter__(self) -> UnitOfWorkABC:
         return self

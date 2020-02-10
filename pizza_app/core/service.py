@@ -63,7 +63,7 @@ class Service:
             )
             uow.commit()
 
-    def make_order(self, cart_uid: str, client_name: str, client_phone: str, client_address: str):
+    def checkout(self, cart_uid: str, client_name: str, client_phone: str, client_address: str):
         with self.uow_manager.new() as uow:
             cart = uow.carts.get(cart_uid)
             if cart is None:

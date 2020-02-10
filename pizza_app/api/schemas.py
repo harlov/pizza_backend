@@ -28,6 +28,13 @@ class CartSchema(Schema):
     delivery_cost = fields.Float(dump_only=True)
 
 
+class CheckoutSchema(Schema):
+    client_name = fields.Str()
+    client_phone = fields.Str()
+    client_address = fields.Str()
+
+
 menu_item_schema = MenuItemSchema()
 cart_item_schema = CartItemSchema()
 cart_schema = CartSchema()
+checkout_schema = CheckoutSchema()

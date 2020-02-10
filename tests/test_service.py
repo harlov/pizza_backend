@@ -1,6 +1,7 @@
 import pytest
 
 from pizza_app.core import models
+from pizza_app.core import exceptions
 from pizza_app.core.uow import UnitOfWorkABC
 from pizza_app.core.service import Service
 
@@ -66,14 +67,14 @@ def test_add_items_to_cart(service: Service, cart: models.Cart,
     assert cart_state.items[0].quantity == 3
 
 
-def test_make_order(service: Service, cart: models.Cart, menu_item: models.MenuItem, menu_item_2: models.MenuItem, uow: UnitOfWorkABC) -> models.Order:
+def test_checkout(service: Service, cart: models.Cart, menu_item: models.MenuItem, menu_item_2: models.MenuItem, uow: UnitOfWorkABC) -> models.Order:
     fake_name = "Pikachu"
     fake_phone = "+7-900-800-8001"
     fake_address = "Moscow, Kremlin"
 
     service.add_menu_item_to_cart(cart.uid, menu_item.uid, 1)
     service.add_menu_item_to_cart(cart.uid, menu_item_2.uid, 2)
-    order = service.make_order(cart.uid, fake_name, fake_phone, fake_address)
+    order = service.checkout(cart.uid, fake_name, fake_phone, fake_address)
     order_state = uow.orders.get(order.uid)
     assert order_state is not None and order_state.uid == order.uid
 
@@ -91,3 +92,6 @@ def test_make_order(service: Service, cart: models.Cart, menu_item: models.MenuI
 
     cart = uow.carts.get(cart.uid)
     assert cart.status == models.CartStatus.STATUS_PROCESSED
+
+    with pytest.raises(exceptions.CoreException):  # second call checkout must fail
+        service.checkout(cart.uid, fake_name, fake_phone, fake_address)

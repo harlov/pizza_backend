@@ -58,3 +58,15 @@ def delete_item_from_cart(uid):
     )
     service.delete_menu_item_from_cart(uid, data['menu_item_uid'], data['quantity'])
     return empty_response
+
+
+@route('/api/v1/cart/<uid>/checkout', methods=['POST'])
+def checkout_cart(uid):
+    data = schemas.checkout_schema.load(request.get_json())
+
+    service.checkout(
+        cart_uid=uid,
+        client_name=data['client_name'],
+        client_address=data['client_address'],
+        client_phone=data['client_phone'],
+    )

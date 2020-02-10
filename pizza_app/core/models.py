@@ -138,6 +138,9 @@ class Order:
 
     @classmethod
     def make_from_cart(cls, cart: Cart, client: Client, address: str, phone: str, currency: Currency) -> Order:
+        if cart.status == CartStatus.STATUS_PROCESSED:
+            raise exceptions.CoreException(exceptions.CART_IS_PROCESSED)
+
         order = Order(
             uid=make_uid(),
             cart=cart,
